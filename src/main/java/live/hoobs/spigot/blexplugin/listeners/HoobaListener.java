@@ -1,22 +1,14 @@
 package live.hoobs.spigot.blexplugin.listeners;
-
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import net.md_5.bungee.api.chat.TextComponent;
-
-import java.lang.System.Logger;
-import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.Chunk;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Entity; 
@@ -25,15 +17,14 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.entity.Player;
 import live.hoobs.spigot.blexplugin.App;
 
 
-public class HoobaListerner implements Listener { 
+public class HoobaListener implements Listener { 
     BossBar bossBar = null;
     LivingEntity Hooba = null; 
 
-    public HoobaListerner(){
+    public HoobaListener(){
         checkHooba();
     }
 
@@ -134,7 +125,6 @@ public class HoobaListerner implements Listener {
             return;
         }
 
-        Bukkit.getServer().spigot().broadcast( new TextComponent("§cHOOBA SPAWNS!"));
         Hooba = (LivingEntity) entity;
         bossBar = addBossBar(Hooba);
         jailHooba();
