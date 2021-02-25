@@ -1,0 +1,6 @@
+main: live.hoobs.spigot.blexplugin.App
+name: BlexBot
+version: 0.1
+author: RealBaconEater
+description: Blexes 24 hours a day
+api-version: 1.16
