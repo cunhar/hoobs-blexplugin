@@ -1,6 +1,9 @@
 package live.hoobs.spigot.blexplugin;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import live.hoobs.spigot.blexplugin.commands.CommandBlexBot;
 import live.hoobs.spigot.blexplugin.listeners.BossListener;
+import live.hoobs.spigot.blexplugin.listeners.SpectatorListener;
 
 /**
  * BlexBot
@@ -13,6 +16,11 @@ public class App extends JavaPlugin {
         
         //bosses
         getServer().getPluginManager().registerEvents(new BossListener(), this);
+
+        //spectator
+        SpectatorListener specListener = new SpectatorListener();
+        getServer().getPluginManager().registerEvents(specListener, this);
+        //this.getCommand("blexbot").setExecutor(new CommandBlexBot(specListener));
         
         // respectate
         // new BukkitRunnable() {   

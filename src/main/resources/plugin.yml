@@ -4,3 +4,8 @@ version: 0.1
 author: RealBaconEater
 description: Blexes 24 hours a day
 api-version: 1.16
+commands:
+   blexbot:
+      description: BlexBot Console Command
+      usage: /blexbot
+      permission: blexbot.command
