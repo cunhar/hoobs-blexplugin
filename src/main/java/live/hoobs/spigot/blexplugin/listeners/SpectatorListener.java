@@ -7,6 +7,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.block.DoubleChest;
+import org.bukkit.block.EnderChest;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -48,6 +49,23 @@ public class SpectatorListener implements Listener {
         blexBot.setSpectatorTarget(spectator);
     }
 
+    private boolean isSpectator(Player p){
+
+        if (blexBot == null || !blexBot.isOnline()){
+            return false;
+        }
+
+        if (p == blexBot){
+            return false;
+        }
+
+        if (p != blexBot.getSpectatorTarget()){
+            return false;
+        }
+
+        return true;
+    }
+
     @EventHandler (priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerJoin(PlayerJoinEvent event){
         Player player = event.getPlayer();
@@ -75,115 +93,59 @@ public class SpectatorListener implements Listener {
         }
     }
 
-    public void setInventory(Inventory inv, Player p){
-        //Set BlexBot Inventory
-        blexBot.getInventory().setContents(p.getInventory().getContents());
-
-        //set inventory for showing
-        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
-            @Override
-            public void run() {
-                if (inv.getType() != InventoryType.SHULKER_BOX || inv.getViewers().size() >= 1){
-                    blexBot.openInventory(inv);
-                }               
-            }
-        }, 1);
-    }
-
-    // @EventHandler (priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    // public void onPlayerInteract(PlayerInteractEvent e) {
-    //     Player p = e.getPlayer();
-
-    //     if (blexBot == null || !blexBot.isOnline()){
-    //         return;
-    //     }
-
-    //     if (p != blexBot.getSpectatorTarget()){
-    //         return;
-    //     }
-
-    //     if (!e.hasBlock() || e.getAction() != Action.RIGHT_CLICK_BLOCK) { 
-    //         return; 
-    //     }
-
-    //     Block b = e.getClickedBlock();
-    //     BlockState bs = b.getState();
-    //     Inventory i = null;
-
-    //     if(bs instanceof InventoryHolder){
-    //         plugin.getLogger().info("Spectator opened Container!");
-
-    //         //Get inventory for showing
-    //         InventoryHolder ih = (InventoryHolder) b.getState();
-    //         i = ih.getInventory();
-    //     } 
-
-    //     if (b.getType() == Material.ENDER_CHEST) {
-    //         plugin.getLogger().info("Spectator opened Ender Chest!");
-    //         i = p.getEnderChest();
-    //     }
-    
-    //     if (b.getType() == Material.CRAFTING_TABLE) {
-    //         plugin.getLogger().info("Spectator opened Crafting Table");
-    //         i = Bukkit.createInventory(null, InventoryType.WORKBENCH, "Crafting");
-    //     }
-    
-    //     if (i != null){
-    //         setInventory(i,p);
-    //     }
-    // }
-
-    @EventHandler (priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onInventoryClick(InventoryClickEvent e) {
-        Player p = (Player) e.getWhoClicked();
-
-        if (blexBot == null || !blexBot.isOnline()){
-            return;
-        }
-        
-
-        if (p != blexBot.getSpectatorTarget()){
-            return;
-        }
-
-        if (blexBot.getOpenInventory().getType() == InventoryType.CRAFTING){
-            return;
-        }
-
-        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
-            @Override
-            public void run() {
-                blexBot.getInventory().setContents(p.getInventory().getContents());
-            }
-        }, 1);
-
-    }
-
     @EventHandler (priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void InvOpen(InventoryOpenEvent e){
         Player p = (Player) e.getPlayer();
-
-        if (blexBot == null || !blexBot.isOnline()){
+        
+        if (!isSpectator(p)){
             return;
         }
 
-        if (p != blexBot.getSpectatorTarget()){
+        InventoryType type = e.getInventory().getType();
+        plugin.getLogger().info("Spectator (" + p.getDisplayName().toString() + ") opened " + type.toString());
+
+        blexBot.getInventory().setContents(p.getInventory().getContents());
+
+        if (type == InventoryType.WORKBENCH) {
+            return;
+        }
+
+        if (type == InventoryType.ENDER_CHEST) {
+            Inventory i = Bukkit.createInventory(null, InventoryType.ENDER_CHEST, "Ender Chest");
+            i.setStorageContents(e.getInventory().getContents());
+            blexBot.openInventory(i);
             return;
         }
 
         blexBot.openInventory(e.getInventory());
+    }
 
+    @EventHandler
+    public void onInvClick(InventoryClickEvent e) {
+        Player p = (Player) e.getWhoClicked();
+        
+        if (!isSpectator(p)){
+            return;
+        }
+
+        Inventory inv = e.getInventory();
+        if (inv.getType() == InventoryType.ENDER_CHEST) {
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+                @Override
+                public void run() {
+                    Inventory i = Bukkit.createInventory(null, InventoryType.ENDER_CHEST, "Ender Chest");
+                    i.setStorageContents(e.getInventory().getContents());
+                    blexBot.openInventory(i);       
+                }
+            }, 1);
+        }
     }
 
     @EventHandler (priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void InvClose(InventoryCloseEvent e){
         Player p = (Player) e.getPlayer();
 
-        if (blexBot == null || !blexBot.isOnline()){
-            return;
-        }
-
-        if (p != blexBot.getSpectatorTarget()){
+        if (!isSpectator(p)){
             return;
         }
 
@@ -194,15 +156,12 @@ public class SpectatorListener implements Listener {
     public void onPlayerTeleport(PlayerTeleportEvent e) {
         Player p = (Player) e.getPlayer();
 
-        if (blexBot == null || !blexBot.isOnline()){
+        if (!isSpectator(p)){
             return;
         }
 
-        if (p != blexBot) {
-            return;
-        }
-
-        if (blexBot.getSpectatorTarget() == null)
+        if (blexBot.getSpectatorTarget() == null){
             blexBot.closeInventory();
+        }
     }
 }
