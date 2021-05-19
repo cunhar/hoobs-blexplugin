@@ -15,7 +15,7 @@ public class App extends JavaPlugin {
         getLogger().info("Hello, I'm BlexBot!");
         
         //bosses
-        getServer().getPluginManager().registerEvents(new BossListener(), this);
+        // getServer().getPluginManager().registerEvents(new BossListener(), this);
 
         //spectator
         SpectatorListener specListener = new SpectatorListener();
